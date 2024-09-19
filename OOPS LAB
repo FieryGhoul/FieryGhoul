@@ -1,1 +1,166 @@
+// Interface Series
+interface Series {
+    int getNext();    // Method to return the next number in the series
+    void reset();     // Method to reset the series
+    void setStart(int x); // Method to set the starting value of the series
+}
+class ByTwos implements Series {
+    private int start;
+    private int value;
 
+    // Constructor to initialize the start and value
+    public ByTwos() {
+        start = 0;
+        value = 0;
+    }
+
+    // Method to return the next number in the series
+    @Override
+    public int getNext() {
+        value += 2;
+        return value;
+    }
+
+    // Method to reset the series
+    @Override
+    public void reset() {
+        value = start;
+    }
+
+    // Method to set the start of the series
+    @Override
+    public void setStart(int x) {
+        start = x;
+        value = x;
+    }
+}
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        // Create an instance of ByTwos class
+        ByTwos series = new ByTwos();
+
+        // Create a Scanner object to take input from the user
+        Scanner sc = new Scanner(System.in);
+
+        // Set the starting value of the series
+        System.out.print("Enter the starting value of the series: ");
+        int startValue = sc.nextInt();
+        series.setStart(startValue);
+
+        // Generate and display the next numbers in the series
+        System.out.println("Next 5 numbers in the series are:");
+        for (int i = 0; i < 5; i++) {
+            System.out.println(series.getNext());
+        }
+
+        // Reset the series and display it again
+        series.reset();
+        System.out.println("Series after reset:");
+        for (int i = 0; i < 5; i++) {
+            System.out.println(series.getNext());
+        }
+
+        sc.close();
+    }
+}
+
+
+
+
+
+
+import java.util.Scanner;
+
+// Interface Sports
+interface Sports {
+    void putGrade();  // Method to display grade in Sports
+}
+
+// Class Student
+class Student {
+    private int rollNo;
+    private int marks;
+
+    // Method to get the roll number
+    public void getNumber(int rollNo) {
+        this.rollNo = rollNo;
+    }
+
+    // Method to display the roll number
+    public void putNumber() {
+        System.out.println("Roll No: " + rollNo);
+    }
+
+    // Method to get the marks
+    public void getMarks(int marks) {
+        this.marks = marks;
+    }
+
+    // Method to display the marks
+    public void putMarks() {
+        System.out.println("Marks: " + marks);
+    }
+
+    // Method to return marks (to be used in Result class)
+    public int getMarksValue() {
+        return marks;
+    }
+}
+
+// Class Result implementing Sports and extending Student
+class Result extends Student implements Sports {
+    private char grade;
+
+    // Constructor to initialize grade
+    public Result(char grade) {
+        this.grade = grade;
+    }
+
+    // Implementation of putGrade from Sports interface
+    @Override
+    public void putGrade() {
+        System.out.println("Sports Grade: " + grade);
+    }
+
+    // Method to generate and display the final result
+    public void displayFinalResult() {
+        putNumber();
+        putMarks();
+        putGrade();
+        String result = (getMarksValue() > 40 && grade != 'F') ? "Pass" : "Fail";
+        System.out.println("Final Result: " + result);
+    }
+}
+
+// Main class to test the implementation
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Taking input for roll number
+        System.out.print("Enter Roll No: ");
+        int rollNo = sc.nextInt();
+
+        // Taking input for marks
+        System.out.print("Enter Marks: ");
+        int marks = sc.nextInt();
+
+        // Taking input for sports grade
+        System.out.print("Enter Sports Grade (A/B/C/D/F): ");
+        char grade = sc.next().charAt(0);
+
+        // Create a Result object with the input grade
+        Result studentResult = new Result(grade);
+
+        // Set Roll No and Marks from user input
+        studentResult.getNumber(rollNo);
+        studentResult.getMarks(marks);
+
+        // Display Final Result
+        studentResult.displayFinalResult();
+
+        sc.close();
+    }
+}
