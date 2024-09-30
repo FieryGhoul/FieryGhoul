@@ -1,166 +1,410 @@
-// Interface Series
-interface Series {
-    int getNext();    // Method to return the next number in the series
-    void reset();     // Method to reset the series
-    void setStart(int x); // Method to set the starting value of the series
+// lab 8 Q1
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+typedef struct PriorityQueue {
+    Node* front;
+} PriorityQueue;
+
+PriorityQueue* createQueue() {
+    PriorityQueue* pq = (PriorityQueue*)malloc(sizeof(PriorityQueue));
+    pq->front = NULL;
+    return pq;
 }
-class ByTwos implements Series {
-    private int start;
-    private int value;
 
-    // Constructor to initialize the start and value
-    public ByTwos() {
-        start = 0;
-        value = 0;
-    }
+void pqinsert(PriorityQueue* pq, int x) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = x;
+    newNode->next = NULL;
 
-    // Method to return the next number in the series
-    @Override
-    public int getNext() {
-        value += 2;
-        return value;
-    }
-
-    // Method to reset the series
-    @Override
-    public void reset() {
-        value = start;
-    }
-
-    // Method to set the start of the series
-    @Override
-    public void setStart(int x) {
-        start = x;
-        value = x;
-    }
-}
-import java.util.Scanner;
-
-public class Main {
-    public static void main(String[] args) {
-        // Create an instance of ByTwos class
-        ByTwos series = new ByTwos();
-
-        // Create a Scanner object to take input from the user
-        Scanner sc = new Scanner(System.in);
-
-        // Set the starting value of the series
-        System.out.print("Enter the starting value of the series: ");
-        int startValue = sc.nextInt();
-        series.setStart(startValue);
-
-        // Generate and display the next numbers in the series
-        System.out.println("Next 5 numbers in the series are:");
-        for (int i = 0; i < 5; i++) {
-            System.out.println(series.getNext());
+    if (pq->front == NULL || pq->front->data > x) {
+        newNode->next = pq->front;
+        pq->front = newNode;
+    } else {
+        Node* temp = pq->front;
+        while (temp->next != NULL && temp->next->data <= x) {
+            temp = temp->next;
         }
+        newNode->next = temp->next;
+        temp->next = newNode;
+    }
+}
 
-        // Reset the series and display it again
-        series.reset();
-        System.out.println("Series after reset:");
-        for (int i = 0; i < 5; i++) {
-            System.out.println(series.getNext());
+int pqmindelete(PriorityQueue* pq) {
+    if (pq->front == NULL) {
+        printf("Queue is empty.\n");
+        return -1; 
+    }
+
+    Node* temp = pq->front;
+    int min = temp->data;
+    pq->front = pq->front->next;
+    free(temp);
+
+    return min;
+}
+
+void display(PriorityQueue* pq) {
+    if (pq->front == NULL) {
+        printf("Queue is empty.\n");
+        return;
+    }
+
+    Node* temp = pq->front;
+    while (temp != NULL) {
+        printf("%d -> ", temp->data);
+        temp = temp->next;
+    }
+    printf("NULL\n");
+}
+
+int main() {
+    PriorityQueue* pq = createQueue();
+    
+    pqinsert(pq, 10);
+    pqinsert(pq, 5);
+    pqinsert(pq, 20);
+    pqinsert(pq, 15);
+    
+    printf("Queue: ");
+    display(pq);
+    
+    printf("Removed: %d\n", pqmindelete(pq));
+    printf("Queue after removal: ");
+    display(pq);
+    
+    return 0;
+}
+
+
+// lab 8 Q2
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 100
+
+typedef struct Deque {
+    char* arr[MAX];
+    int front;
+    int rear;
+    int size;
+} Deque;
+
+Deque* createDeque() {
+    Deque* dq = (Deque*)malloc(sizeof(Deque));
+    dq->front = -1;
+    dq->rear = -1;
+    dq->size = 0;
+    return dq;
+}
+
+int isFull(Deque* dq) {
+    return dq->size == MAX;
+}
+
+int isEmpty(Deque* dq) {
+    return dq->size == 0;
+}
+
+void insertFront(Deque* dq, char* str) {
+    if (isFull(dq)) {
+        printf("Deque is full.\n");
+        return;
+    }
+    if (dq->front == -1) {
+        dq->front = dq->rear = 0;
+    } else if (dq->front == 0) {
+        dq->front = MAX - 1;
+    } else {
+        dq->front--;
+    }
+    dq->arr[dq->front] = strdup(str);
+    dq->size++;
+}
+
+void insertRear(Deque* dq, char* str) {
+    if (isFull(dq)) {
+        printf("Deque is full.\n");
+        return;
+    }
+    if (dq->rear == -1) {
+        dq->front = dq->rear = 0;
+    } else if (dq->rear == MAX - 1) {
+        dq->rear = 0;
+    } else {
+        dq->rear++;
+    }
+    dq->arr[dq->rear] = strdup(str);
+    dq->size++;
+}
+
+char* deleteFront(Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque is empty.\n");
+        return NULL;
+    }
+    char* temp = dq->arr[dq->front];
+    if (dq->front == dq->rear) {
+        dq->front = dq->rear = -1;
+    } else if (dq->front == MAX - 1) {
+        dq->front = 0;
+    } else {
+        dq->front++;
+    }
+    dq->size--;
+    return temp;
+}
+
+void display(Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque is empty.\n");
+        return;
+    }
+
+    int i = dq->front;
+    while (1) {
+        printf("%s ", dq->arr[i]);
+        if (i == dq->rear) {
+            break;
         }
-
-        sc.close();
+        i = (i + 1) % MAX;
     }
+    printf("\n");
+}
+
+int main() {
+    Deque* dq = createDeque();
+
+    insertRear(dq, "Hello");
+    insertRear(dq, "World");
+    insertFront(dq, "Front");
+    insertRear(dq, "Deque");
+
+    printf("Deque: ");
+    display(dq);
+
+    printf("Deleted: %s\n", deleteFront(dq));
+    printf("Deque after deletion: ");
+    display(dq);
+
+    return 0;
+}
+
+
+// lab 8 Q3
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 100
+
+typedef struct Deque {
+    char arr[MAX];
+    int front;
+    int rear;
+    int size;
+} Deque;
+
+Deque* createDeque() {
+    Deque* dq = (Deque*)malloc(sizeof(Deque));
+    dq->front = -1;
+    dq->rear = -1;
+    dq->size = 0;
+    return dq;
+}
+
+int isFull(Deque* dq) {
+    return dq->size == MAX;
+}
+
+int isEmpty(Deque* dq) {
+    return dq->size == 0;
+}
+
+void insertRear(Deque* dq, char ch) {
+    if (isFull(dq)) {
+        printf("Deque is full.\n");
+        return;
+    }
+    if (dq->rear == -1) {
+        dq->front = dq->rear = 0;
+    } else if (dq->rear == MAX - 1) {
+        dq->rear = 0;
+    } else {
+        dq->rear++;
+    }
+    dq->arr[dq->rear] = ch;
+    dq->size++;
+}
+
+char deleteFront(Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque is empty.\n");
+        return '\0';
+    }
+    char temp = dq->arr[dq->front];
+    if (dq->front == dq->rear) {
+        dq->front = dq->rear = -1;
+    } else if (dq->front == MAX - 1) {
+        dq->front = 0;
+    } else {
+        dq->front++;
+    }
+    dq->size--;
+    return temp;
+}
+
+char deleteRear(Deque* dq) {
+    if (isEmpty(dq)) {
+        printf("Deque is empty.\n");
+        return '\0';
+    }
+    char temp = dq->arr[dq->rear];
+    if (dq->rear == dq->front) {
+        dq->rear = dq->front = -1;
+    } else if (dq->rear == 0) {
+        dq->rear = MAX - 1;
+    } else {
+        dq->rear--;
+    }
+    dq->size--;
+    return temp;
+}
+
+int isPalindrome(char str[]) {
+    Deque* dq = createDeque();
+    int len = strlen(str);
+
+    for (int i = 0; i < len; i++) {
+        insertRear(dq, str[i]);
+    }
+
+    while (dq->size > 1) {
+        if (deleteFront(dq) != deleteRear(dq)) {
+            return 0; // Not a palindrome
+        }
+    }
+
+    return 1; // Palindrome
+}
+
+int main() {
+    char str[MAX];
+    printf("Enter a string: ");
+    scanf("%s", str);
+
+    if (isPalindrome(str)) {
+        printf("The string is a palindrome.\n");
+    } else {
+        printf("The string is not a palindrome.\n");
+    }
+
+    return 0;
 }
 
 
 
+// lab 8 Q4
 
+#include <stdio.h>
+#include <stdlib.h>
 
+#define MAX 100
 
-import java.util.Scanner;
+typedef struct Queue {
+    int arr[MAX];
+    int front;
+    int rear;
+} Queue;
 
-// Interface Sports
-interface Sports {
-    void putGrade();  // Method to display grade in Sports
+Queue* createQueue() {
+    Queue* q = (Queue*)malloc(sizeof(Queue));
+    q->front = -1;
+    q->rear = -1;
+    return q;
 }
 
-// Class Student
-class Student {
-    private int rollNo;
-    private int marks;
-
-    // Method to get the roll number
-    public void getNumber(int rollNo) {
-        this.rollNo = rollNo;
-    }
-
-    // Method to display the roll number
-    public void putNumber() {
-        System.out.println("Roll No: " + rollNo);
-    }
-
-    // Method to get the marks
-    public void getMarks(int marks) {
-        this.marks = marks;
-    }
-
-    // Method to display the marks
-    public void putMarks() {
-        System.out.println("Marks: " + marks);
-    }
-
-    // Method to return marks (to be used in Result class)
-    public int getMarksValue() {
-        return marks;
-    }
+int empty(Queue* q) {
+    return q->front == -1;
 }
 
-// Class Result implementing Sports and extending Student
-class Result extends Student implements Sports {
-    private char grade;
-
-    // Constructor to initialize grade
-    public Result(char grade) {
-        this.grade = grade;
+void enqueue(Queue* q, int x) {
+    if ((q->rear + 1) % MAX == q->front) {
+        printf("Queue is full.\n");
+        return;
     }
-
-    // Implementation of putGrade from Sports interface
-    @Override
-    public void putGrade() {
-        System.out.println("Sports Grade: " + grade);
+    if (q->front == -1) {
+        q->front = 0;
     }
-
-    // Method to generate and display the final result
-    public void displayFinalResult() {
-        putNumber();
-        putMarks();
-        putGrade();
-        String result = (getMarksValue() > 40 && grade != 'F') ? "Pass" : "Fail";
-        System.out.println("Final Result: " + result);
-    }
+    q->rear = (q->rear + 1) % MAX;
+    q->arr[q->rear] = x;
 }
 
-// Main class to test the implementation
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-
-        // Taking input for roll number
-        System.out.print("Enter Roll No: ");
-        int rollNo = sc.nextInt();
-
-        // Taking input for marks
-        System.out.print("Enter Marks: ");
-        int marks = sc.nextInt();
-
-        // Taking input for sports grade
-        System.out.print("Enter Sports Grade (A/B/C/D/F): ");
-        char grade = sc.next().charAt(0);
-
-        // Create a Result object with the input grade
-        Result studentResult = new Result(grade);
-
-        // Set Roll No and Marks from user input
-        studentResult.getNumber(rollNo);
-        studentResult.getMarks(marks);
-
-        // Display Final Result
-        studentResult.displayFinalResult();
-
-        sc.close();
+int dequeue(Queue* q) {
+    if (empty(q)) {
+        printf("Queue is empty.\n");
+        return -1;
     }
+    int x = q->arr[q->front];
+    if (q->front == q->rear) {
+        q->front = q->rear = -1;
+    } else {
+        q->front = (q->front + 1) % MAX;
+    }
+    return x;
 }
+
+void reverseQueue(Queue* q) {
+    if (empty(q)) {
+        return;
+    }
+    int data = dequeue(q);
+    reverseQueue(q);
+    enqueue(q, data);
+}
+
+void display(Queue* q) {
+    if (empty(q)) {
+        printf("Queue is empty.\n");
+        return;
+    }
+    int i = q->front;
+    while (1) {
+        printf("%d ", q->arr[i]);
+        if (i == q->rear) {
+            break;
+        }
+        i = (i + 1) % MAX;
+    }
+    printf("\n");
+}
+
+int main() {
+    Queue* q = createQueue();
+
+    enqueue(q, 1);
+    enqueue(q, 2);
+    enqueue(q, 3);
+    enqueue(q, 4);
+    enqueue(q, 5);
+
+    printf("Original Queue: ");
+    display(q);
+
+    reverseQueue(q);
+
+    printf("Reversed Queue: ");
+    display(q);
+
+    return 0;
+}
+
